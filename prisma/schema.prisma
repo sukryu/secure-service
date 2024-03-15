@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int   @id @default(autoincrement())
+
+  // Database Authenticate
+  email String @unique
+  username String
+  hashedPassword String
+  phone String @unique
+
+  // Recoverable
+  reset_password_token String? @unique
+  reset_password_sent_at DateTime?
+
+  // Rememberable
+  remember_created_at DateTime?
+
+  // Tracker
+  sign_in_count Int? @default(0)
+  current_sign_in_at DateTime?
+  last_sign_in_at DateTime?
+  current_sign_in_ip String?
+  last_sign_in_ip String?
+
+  // Confirmable
+  confirmation_token String? @unique
+  confirmed_at DateTime?
+  confirmation_sent_at DateTime?
+  unconfirmed_email String?
+
+  // Lockable
+  failed_attempts Int? @default(0)
+  unlock_token String? @unique
+  locked_at DateTime?
+
+  // IsDelete?
+  is_deleted Boolean? @default(false)
+
+  // roles
+  roleId    Int?
+
+
+  tokens    Token[]
+  address   Address[]
+  roles     Role[] @relation("UserRoles")
+
+  // TimeStamps
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+}
+
+model Token {
+  id        Int @id @default(autoincrement())
+  userId    Int
+
+  // data
+  access_token String @unique
+  refresh_token String @unique
+
+  // expires at
+  access_token_expires_at DateTime
+  refresh_token_expires_at DateTime
+
+  user      User @relation(fields: [userId], references: [id])
+}
+
+model Address {
+  id    Int @id @default(autoincrement())
+  userId Int
+  
+  // data
+  houseNumber String?
+  street String?
+  city String?
+  district String?
+  pincode String?
+  landmark String?
+
+  // IsDeleted?
+  is_deleted Boolean? @default(false)
+
+  user       User    @relation(fields: [userId], references: [id])
+
+  // timestamps
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+  deleted_at DateTime?
+}
+
+model Role {
+  id        Int @id @default(autoincrement())
+  name      String @unique
+  users     User[] @relation("UserRoles")
+}
