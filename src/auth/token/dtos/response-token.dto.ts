@@ -11,4 +11,9 @@ export class ResponseTokenDto {
   @IsString()
   @IsOptional()
   refresh_token?: string;
+
+  @ApiProperty({ example: 'token'})
+  @IsString()
+  @IsOptional()
+  reset_password_token?: string;
 }

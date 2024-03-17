@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { IAuthService } from "./auth";
 import { UsersService } from "src/users/users.service";
 import { LoginDto } from "./dtos/login.dto";
@@ -9,6 +9,7 @@ import { TokenService } from "./token/token.service";
 import { ApiResponse } from "src/utils/response.dto";
 import { CreateUserDto } from "src/users/dtos/user/create-user.dto";
 import { RoleEnum } from "src/roles/role.enum";
+import { EmailService } from "src/mails/email/email.service";
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -17,6 +18,7 @@ export class AuthService implements IAuthService {
     private readonly user: UsersService,
     private readonly prisma: PrismaService,
     private readonly token: TokenService,
+    private readonly email: EmailService,
   ) {}
 
   async verify(userId: number): Promise<ApiResponse<User>> {
@@ -25,6 +27,9 @@ export class AuthService implements IAuthService {
       this.logger.error(`invalid credentials`);
       throw new BadRequestException(`invalid credentials`);
     }
+
+    delete user.hashedPassword;
+
     return {
       status: 200,
       message: 'User successfully verified',
@@ -109,6 +114,37 @@ export class AuthService implements IAuthService {
         refresh_token,
       },
     };
+  }
+
+  async Logout(userId: number, refreshToken: string): Promise<void> {
+    if (!userId) {
+      this.logger.error(`userId was not provided`);
+      throw new BadRequestException(`userId was not provided`);
+    }
+    await this.user.verifyUser(userId);
+    await this.token.refreshToken(userId, refreshToken);
+  }
+
+  async AllLogoout(userId: number): Promise<void> {
+    if (!userId) {
+      this.logger.error(`userId was not provided`);
+      throw new BadRequestException(`userId was not provided`);
+    }  
+
+    await this.token.deleteAllRefreshToken(userId);
+  }
+
+  async RequestResetPassword(email: string): Promise<void> {
+    // 1. verify user.
+    const user = await this.user.getUserByEmail(email);
+
+    if (!user) {
+      this.logger.error(`user not found : ${email}`);
+      throw new NotFoundException(`user not found : ${email}`);
+    }
+
+    // 2. generate Reset Password Token.
+    const { reset_password_token } = await this.token.generateResetPasswordToken(user.id);
   }
 
   protected async updateUserFailedAttempts(userId: number, attempts: number, lockedAt: Date | null): Promise<void> {

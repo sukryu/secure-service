@@ -4,7 +4,7 @@ import { AuthService } from "./auth.service";
 import { UsersService } from "src/users/users.service";
 import { LoginDto } from "./dtos/login.dto";
 import { CreateUserDto } from "src/users/dtos/user/create-user.dto";
-import { TypedEventEmitter } from "src/mails/event-emitter/typed-event-emitter.class";
+import { TypedEventEmitter } from "kafka/event-emitter/typed-event-emitter.class";
 import { generateAlphaNumericOTP } from "src/utils/utils";
 
 @ApiBearerAuth()

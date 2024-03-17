@@ -1,4 +1,4 @@
-import { EventPayloads } from 'src/mails/interface/event-type.interface';
+import { EventPayloads } from 'kafka/interface/event-type.interface';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -16,7 +16,7 @@ export class EmailService {
     await this.mailerService.sendMail({
       to: email,
       subject,
-      template: '../shared/welcome',
+      template: './shared/welcome',
       context: {
         name,
       },
@@ -32,7 +32,7 @@ export class EmailService {
     await this.mailerService.sendMail({
       to: email,
       subject,
-      template: '../shared/forgot-password',
+      template: './shared/forgot-password',
       context: {
         link,
         name,
@@ -49,7 +49,7 @@ export class EmailService {
     await this.mailerService.sendMail({
       to: email,
       subject,
-      template: '../shared/verify-email',
+      template: './shared/verify-email',
       context: {
         otp,
         name,

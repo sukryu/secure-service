@@ -24,7 +24,7 @@ model User {
 
   // Recoverable
   reset_password_token String? @unique
-  reset_password_sent_at DateTime?
+  reset_password_expiresIn DateTime?
 
   // Rememberable
   remember_created_at DateTime?

@@ -11,9 +11,13 @@ export class TokenService implements ITokenService {
 
   private readonly access_token_secret = this.configService.get<string>("ACCESS_TOKEN_SECRET");
   private readonly access_token_expiresIn = this.configService.get<string>('ACCESS_TOKEN_EXPIRESIN');
+  
   private readonly refresh_token_secret = this.configService.get<string>("REFRESH_TOKEN_SECRET");
   private readonly refresh_token_expiresIn = this.configService.get<string>("REFRESH_TOKEN_EXPIRESIN");
-  
+
+  private readonly reset_password_token_secret = this.configService.get<string>("RESET_PASSWORD_TOKEN_SECRET");
+  private readonly reset_password_token_expiresIn = this.configService.get<string>("RESET_PASSWORD_TOKEN_EXPIRESIN");
+
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
@@ -44,6 +48,24 @@ export class TokenService implements ITokenService {
     });
 
     return { access_token, refresh_token };
+  }
+
+  async generateResetPasswordToken(userId: number): Promise<ResponseTokenDto> {
+    const payload = { sub: userId };
+    const reset_password_token = this.jwt.sign(payload, {
+      secret: this.reset_password_token_secret,
+      expiresIn: this.reset_password_token_expiresIn,
+    });
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        reset_password_token: reset_password_token,
+        reset_password_expiresIn: new Date(Date.now() + 60 * 60 * 1000), 
+      }
+    });
+
+    return { reset_password_token };
   }
 
   async verifyToken(token: string, type: "access" | "refresh"): Promise<boolean> {

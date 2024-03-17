@@ -236,7 +236,7 @@ export class UsersService implements IUsersService {
     return new AddressResponseDto(address);
   }
 
-  private async verifyUser(userId: number): Promise<User> {
+  async verifyUser(userId: number): Promise<User> {
     const cacheUser = await this.redis.get(`user:${userId}`);
     let user: User | null = null;
 

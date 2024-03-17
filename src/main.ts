@@ -5,10 +5,22 @@ import helmet from 'helmet';
 import { useContainer } from 'class-validator';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {cors: true });
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
+  app.connectMicroservice({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: ['kafka:9092'],
+      },
+      consumer: {
+        groupId: 'ecommerce-group-' + Math.random(),
+      },
+    },
+  });
   app.enableShutdownHooks();
   app.setGlobalPrefix('api');
   app.enableVersioning({

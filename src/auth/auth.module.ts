@@ -8,7 +8,8 @@ import { AuthController } from './auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaService } from 'prisma/prisma.service';
-import { TypedEventEmitterModule } from 'src/mails/event-emitter/typed-event-emitter.module';
+import { TypedEventEmitterModule } from 'kafka/event-emitter/typed-event-emitter.module';
+import { EmailService } from 'src/mails/email/email.service';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { TypedEventEmitterModule } from 'src/mails/event-emitter/typed-event-emi
     AuthService, 
     TokenService, 
     PrismaService,
+    EmailService,
   ],
   exports: [AuthService],
 })
